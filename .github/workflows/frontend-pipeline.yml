@@ -1,0 +1,50 @@
+name: frontend pipeline
+
+on:
+  push:
+    branches:
+      - frontend_service
+  pull_request:
+    branches:
+      - frontend_service
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Install and Run Sherlock Scanner
+        run: |
+          pip install sherlock-scanner
+          sherlock . || true  # Prevent pipeline failure on findings, optional
+
+      - name: Install and Run Bandit
+        run: |
+          pip install bandit
+          bandit -r . -ll || true  # Prevent pipeline failure on findings, optional
+
+      - name: Build Docker Image
+        run: |
+          docker build -t rebachi/stockpnl:frontend .
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Push Docker Image to Docker Hub
+        run: |
+          docker push rebachi/stockpnl:frontend 
+
+      - name: Notify on Success
+        run: echo "Pipeline is done"
