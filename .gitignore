@@ -16,6 +16,8 @@ env/
 *.swp
 .env
 
+tools_to_use.txt
+
 # SQLite database
 *.sqlite3
 
