@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, redirect, jsonify
 import requests
 
 app = Flask(__name__)
@@ -15,8 +15,8 @@ def register():
         username = request.form["username"]
         password = request.form["password"]
         response = requests.post(
-            "http://auth-service.default.svc.cluster.local/register", 
-            json={"username": username, "password": password}
+            "http://auth-service.default.svc.cluster.local/register",
+            json={"username": username, "password": password},
         )
         if response.status_code == 200:
             return redirect("/login")
@@ -29,8 +29,8 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
         response = requests.post(
-            "http://auth-service.default.svc.cluster.local/login", 
-            json={"username": username, "password": password}
+            "http://auth-service.default.svc.cluster.local/login",
+            json={"username": username, "password": password},
         )
         if response.status_code == 200:
             return redirect("/trade")

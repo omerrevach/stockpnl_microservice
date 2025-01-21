@@ -14,15 +14,19 @@ document.addEventListener("DOMContentLoaded", function () {
             entry_price: parseFloat(document.getElementById("entry_price").value),
             position: document.getElementById("position").value,
             risk_amount: parseFloat(document.getElementById("risk_amount").value),
-            stop_loss: document.getElementById("stop_loss").value ? parseFloat(document.getElementById("stop_loss").value) : null,
-            take_profit: document.getElementById("take_profit").value ? parseFloat(document.getElementById("take_profit").value) : null
+            stop_loss: document.getElementById("stop_loss").value
+                ? parseFloat(document.getElementById("stop_loss").value)
+                : null,
+            take_profit: document.getElementById("take_profit").value
+                ? parseFloat(document.getElementById("take_profit").value)
+                : null,
         };
 
         try {
             const response = await fetch(`${TRADE_SERVICE_BASE_URL}/trade`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(formData),
             });
 
             const result = await response.json();
@@ -89,9 +93,9 @@ document.addEventListener("DOMContentLoaded", function () {
                             data: profitLoss,
                             backgroundColor: profitLoss.map((p) => (p > 0 ? "green" : "red")),
                             borderColor: "black",
-                            borderWidth: 1
-                        }
-                    ]
+                            borderWidth: 1,
+                        },
+                    ],
                 },
                 options: {
                     responsive: true,
@@ -99,10 +103,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         y: {
                             beginAtZero: true,
                             suggestedMax: Math.max(...profitLoss) + 20,
-                            suggestedMin: Math.min(...profitLoss) - 20
-                        }
-                    }
-                }
+                            suggestedMin: Math.min(...profitLoss) - 20,
+                        },
+                    },
+                },
             });
         } catch (error) {
             console.error("Error fetching trades:", error);
