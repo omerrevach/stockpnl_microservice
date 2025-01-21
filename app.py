@@ -15,7 +15,7 @@ def register():
         username = request.form["username"]
         password = request.form["password"]
 
-        # Update the service URL to use the full DNS name
+        # Use full DNS name for the service
         response = requests.post("http://auth-service.default.svc.cluster.local/register", json={"username": username, "password": password})
         if response.status_code == 200:
             return redirect("/login")
@@ -29,7 +29,7 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        # Update the service URL to use the full DNS name
+        # Use full DNS name for the service
         response = requests.post("http://auth-service.default.svc.cluster.local/login", json={"username": username, "password": password})
         if response.status_code == 200:
             return redirect("/trade")
@@ -49,7 +49,7 @@ def trade():
             "take_profit": float(request.form["take_profit"]) if request.form["take_profit"] else None
         }
         
-        # Update the service URL to use the full DNS name
+        # Use full DNS name for the service
         response = requests.post("http://trade-service.default.svc.cluster.local/trade", json=trade_data)
         if response.status_code == 200:
             return jsonify(response.json())
