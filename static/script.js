@@ -4,8 +4,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const tradeChartCtx = document.getElementById("tradeChart").getContext("2d");
     let tradeChart = null;
 
+    const backendBaseUrl = "http://trade-service.default.svc.cluster.local";
+
     tradeForm.onsubmit = async function (event) {
-        event.preventDefault();  
+        event.preventDefault();
 
         const formData = {
             stock_ticker: document.getElementById("stock_ticker").value,
@@ -17,11 +19,15 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
         try {
-            const response = await fetch("http://localhost:5002/trade", {
+            const response = await fetch(`${backendBaseUrl}/trade`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
             const result = await response.json();
             alert(`Trade placed successfully! Shares to Buy: ${result.shares_to_buy}`);
@@ -34,7 +40,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchTrades() {
         try {
-            const response = await fetch("http://localhost:5002/get_trades");
+            const response = await fetch(`${backendBaseUrl}/get_trades`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const trades = await response.json();
 
             if (trades.length === 0) {
@@ -84,9 +94,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     responsive: true,
                     scales: {
                         y: {
-                            beginAtZero: true, 
-                            suggestedMax: Math.max(...profitLoss) + 20,  
-                            suggestedMin: Math.min(...profitLoss) - 20  
+                            beginAtZero: true,
+                            suggestedMax: Math.max(...profitLoss) + 20,
+                            suggestedMin: Math.min(...profitLoss) - 20
                         }
                     }
                 }
