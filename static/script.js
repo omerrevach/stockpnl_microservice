@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const tradeChartCtx = document.getElementById("tradeChart").getContext("2d");
     let tradeChart = null;
 
-    const backendBaseUrl = "http://trade-service.default.svc.cluster.local";
+    const TRADE_SERVICE_BASE_URL = "http://trade-service.default.svc.cluster.local";
 
     tradeForm.onsubmit = async function (event) {
         event.preventDefault();
@@ -19,19 +19,20 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
         try {
-            const response = await fetch(`${backendBaseUrl}/trade`, {
+            const response = await fetch(`${TRADE_SERVICE_BASE_URL}/trade`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
             const result = await response.json();
-            alert(`Trade placed successfully! Shares to Buy: ${result.shares_to_buy}`);
-            fetchTrades();  
+
+            if (response.ok) {
+                alert(`Trade placed successfully! Shares to Buy: ${result.shares_to_buy}`);
+                fetchTrades();
+            } else {
+                throw new Error(result.message || "Failed to place trade");
+            }
         } catch (error) {
             console.error("Error placing trade:", error);
             alert("Failed to place trade. Check console for details.");
@@ -40,23 +41,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchTrades() {
         try {
-            const response = await fetch(`${backendBaseUrl}/get_trades`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
+            const response = await fetch(`${TRADE_SERVICE_BASE_URL}/get_trades`);
             const trades = await response.json();
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch trades");
+            }
 
             if (trades.length === 0) {
                 alert("No trades found yet!");
                 return;
             }
 
-            tradesTableBody.innerHTML = "";  
+            tradesTableBody.innerHTML = "";
             const labels = [];
             const profitLoss = [];
 
-            trades.forEach(trade => {
+            trades.forEach((trade) => {
                 labels.push(trade.stock_ticker);
                 profitLoss.push(trade.profit_loss);
 
@@ -82,13 +83,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 type: "bar",
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: "Profit/Loss ($)",
-                        data: profitLoss,
-                        backgroundColor: profitLoss.map(p => p > 0 ? "green" : "red"),
-                        borderColor: "black",
-                        borderWidth: 1
-                    }]
+                    datasets: [
+                        {
+                            label: "Profit/Loss ($)",
+                            data: profitLoss,
+                            backgroundColor: profitLoss.map((p) => (p > 0 ? "green" : "red")),
+                            borderColor: "black",
+                            borderWidth: 1
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
@@ -101,7 +104,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 }
             });
-
         } catch (error) {
             console.error("Error fetching trades:", error);
         }
