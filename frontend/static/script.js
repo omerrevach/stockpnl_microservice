@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const tradeChartCtx = document.getElementById("tradeChart").getContext("2d");
     let tradeChart = null;
 
-    const TRADE_SERVICE_BASE_URL = "http://trade-service.default.svc.cluster.local";
+    const TRADE_SERVICE_BASE_URL = "/proxy";
 
     tradeForm.onsubmit = async function (event) {
         event.preventDefault();
