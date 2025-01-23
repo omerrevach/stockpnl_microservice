@@ -3,10 +3,10 @@ name: auth service pipeline
 on:
   push:
     branches:
-    - auth_service
+      - auth_service
   pull_request:
     branches:
-    - auth_service
+      - auth_service
 
 jobs:
   build_and_test:
@@ -32,15 +32,16 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t rebachi/stockpnl:auth .
+          docker build -t rebachi/stockpnl:auth-${{ github.sha }} .
 
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Push Docker Image to Docker Hub
         run: |
-          docker push rebachi/stockpnl:auth 
+          docker push rebachi/stockpnl:auth-${{ github.sha }}
 
+      # trigger CD pipeline
       - name: Trigger cd-auth pipeline
         run: |
           curl -L \
@@ -50,9 +51,6 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/omerrevach/stockpnl_manifests/dispatches \
             -d '{"event_type": "auth_service_pipeline_complete", "client_payload": {"service": "auth_service", "unit": false, "integration": true, "tag": "${{ github.sha }}"}}'
-
-
-
 
       - name: Notify on Success
         run: echo "Pipeline is done"
