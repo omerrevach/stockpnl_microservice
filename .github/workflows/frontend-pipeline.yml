@@ -44,7 +44,7 @@ jobs:
 
       - name: Push Docker Image to Docker Hub
         run: |
-          docker push rebachi/stockpnl:frontend 
+          docker push rebachi/stockpnl:frontend-${{ github.sha }} 
 
       # trigger CD pipeline
       - name: Trigger cd-auth pipeline
