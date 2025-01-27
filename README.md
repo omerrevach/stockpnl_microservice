@@ -16,6 +16,14 @@
 - Framework: FastAPI
 - Database: MySQL (via Helm chart)
 - Deployment: Docker Compose, Kubernetes
+- CI: GitHub Actions
+
+## Ci Pipeline:
+- Each microservice has a CI pipeline in its own branch dedicated to it
+- Each CI pipline runs tests: sherlock-scanner(my own tool to scan for hardcoded secrets/api's) and Bandit(to detect security issues in code)
+- Build docker image with current commit as the tag
+- Pushes the docker image to dockerhub
+- Triggers the CD pipeline in stockpnl_manifests repo to deploy the app
 
 ### Each microservice is built and maintained in a different branch in this repo
 
