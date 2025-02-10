@@ -1,50 +1,155 @@
+/* General Page Background */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #1c1f26, #2a2d36);
+    color: #f1f1f1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
     margin: 0;
-    padding: 20px;
+}
+
+/* Centered Form Box (For Login, Register, and Home Page) */
+.form-container {
+    background: #292e3a;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.2);
+    width: 400px;
     text-align: center;
 }
 
-form {
-    display: inline-block;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: white;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+/* Headers */
+h1, h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #00c3ff;
 }
 
-input, button, select {
-    display: block;
-    margin: 10px auto;
-    padding: 10px;
-    width: 80%;
+/* Input Fields */
+input {
+    width: 90%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
     border-radius: 5px;
+    background: #1f242d;
+    color: white;
+    font-size: 16px;
+}
+
+input::placeholder {
+    color: #aaa;
+}
+
+/* Fix for Trade Position Dropdown */
+select {
+    width: 95%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    background: #1f242d;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    appearance: none; /* Removes default dropdown styles */
+}
+
+/* Optional: Style dropdown arrow */
+select::-ms-expand {
+    display: none; /* Hide default arrow in IE */
+}
+
+/* Hover and Focus Effects */
+select:hover, select:focus {
+    background: #292e3a;
+    outline: none;
+}
+
+/* Buttons */
+button {
+    width: 95%;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+
+.btn.primary {
+    background: #ffcc00;
+    color: #1c1f26;
+}
+
+.btn.primary:hover {
+    background: #ffdd44;
+}
+
+/* Link Styling */
+p a {
+    color: #00c3ff;
+    text-decoration: none;
+}
+
+p a:hover {
+    text-decoration: underline;
+}
+
+/* ======================== */
+/* TRADE PAGE STYLES BELOW */
+/* ======================== */
+
+/* Trade Page Layout */
+.trade-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Trade Box */
+.trade-card {
+    background: #292e3a;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.2);
+    max-width: 400px;
+    margin: auto;
+}
+
+/* Trade Table */
+.trade-table {
+    max-width: 800px;
+    margin: auto;
+    background: #292e3a;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.2);
 }
 
 table {
-    width: 80%;
-    margin: 20px auto;
+    width: 100%;
     border-collapse: collapse;
+    color: white;
 }
 
 th, td {
-    padding: 10px;
-    border: 1px solid #ddd;
+    padding: 12px;
+    border-bottom: 1px solid #444;
+    text-align: center;
 }
 
-button {
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    cursor: pointer;
+th {
+    background: #00c3ff;
+    color: black;
 }
 
-button:hover {
-    background-color: #0056b3;
-}
-
+/* Chart Styling */
 canvas {
     margin-top: 20px;
     max-width: 700px;

@@ -34,8 +34,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const result = await response.json();
-            alert(`Trade placed successfully!\nShares to Buy: ${result.shares_to_buy}\nProfit/Loss Estimate: ${result.profit_loss.toFixed(2)}`);
-            
+            alert(`Trade placed successfully!\nShares to Buy: ${result.shares_to_buy.toFixed(2)}\nProfit/Loss Estimate: ${result.profit_loss.toFixed(2)}`);
+
             fetchTrades();
         } catch (error) {
             console.error("Error placing trade:", error);
@@ -120,4 +120,3 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fetchTrades();
 });
-
