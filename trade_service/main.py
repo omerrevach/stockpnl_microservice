@@ -6,7 +6,7 @@ import os
 
 app = FastAPI()
 
-# Enable CORS for frontend calls
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -32,35 +32,42 @@ db_config = {
 
 @app.post("/trade")
 def place_trade(trade: Trade):
-    conn = mysql.connector.connect(**db_config)
-    cursor = conn.cursor()
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
 
-    shares_to_buy = trade.risk_amount / (trade.entry_price - (trade.stop_loss or trade.entry_price * 0.95))
-    potential_loss = shares_to_buy * (trade.entry_price - (trade.stop_loss or trade.entry_price * 0.95))
-    potential_profit = shares_to_buy * ((trade.take_profit or trade.entry_price * 1.1) - trade.entry_price)
+        shares_to_buy = trade.risk_amount / (trade.entry_price - (trade.stop_loss or trade.entry_price * 0.95))
+        potential_loss = shares_to_buy * (trade.entry_price - (trade.stop_loss or trade.entry_price * 0.95))
+        potential_profit = shares_to_buy * ((trade.take_profit or trade.entry_price * 1.1) - trade.entry_price)
 
-    cursor.execute(
-        "INSERT INTO trades (stock_ticker, entry_price, position, risk_amount, stop_loss, take_profit) VALUES (%s, %s, %s, %s, %s, %s)",
-        (trade.stock_ticker, trade.entry_price, trade.position, trade.risk_amount, trade.stop_loss, trade.take_profit)
-    )
-    conn.commit()
-    conn.close()
-    return {
-        "message": "Trade placed successfully",
-        "shares_to_buy": shares_to_buy,
-        "profit_loss": potential_profit - potential_loss
-    }
+        cursor.execute(
+            """
+            INSERT INTO trades (stock_ticker, entry_price, position, risk_amount, stop_loss, take_profit, shares_to_buy, profit_loss) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """,
+            (trade.stock_ticker, trade.entry_price, trade.position, trade.risk_amount, trade.stop_loss, trade.take_profit, shares_to_buy, potential_profit - potential_loss)
+        )
+        conn.commit()
+        conn.close()
+
+        return {
+            "message": "Trade placed successfully",
+            "shares_to_buy": shares_to_buy,
+            "profit_loss": potential_profit - potential_loss
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
 
 @app.get("/get_trades")
 def get_trades():
-    conn = mysql.connector.connect(**db_config)
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT stock_ticker, entry_price, risk_amount, stop_loss, take_profit FROM trades")
-    trades = cursor.fetchall()
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM trades")
+        trades = cursor.fetchall()
+        conn.close()
 
-    for trade in trades:
-        trade['shares_to_buy'] = trade['risk_amount'] / (trade['entry_price'] - (trade['stop_loss'] or trade['entry_price'] * 0.95))
-        trade['profit_loss'] = trade['shares_to_buy'] * ((trade['take_profit'] or trade['entry_price'] * 1.1) - trade['entry_price'])
-
-    conn.close()
-    return trades
+        return trades
+    except Exception as e:
+        return {"error": str(e)}
