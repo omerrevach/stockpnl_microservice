@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import mysql.connector
 from pydantic import BaseModel
@@ -6,7 +6,7 @@ import os
 
 app = FastAPI()
 
-# CORS Configuration for Frontend Access
+# CORS Configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  

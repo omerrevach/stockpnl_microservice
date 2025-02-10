@@ -4,28 +4,39 @@ document.addEventListener("DOMContentLoaded", function () {
     const tradeChartCtx = document.getElementById("tradeChart").getContext("2d");
     let tradeChart = null;
 
+    const TRADE_SERVICE_BASE_URL = "/proxy";
+
     tradeForm.onsubmit = async function (event) {
-        event.preventDefault();  
+        event.preventDefault();
 
         const formData = {
             stock_ticker: document.getElementById("stock_ticker").value,
             entry_price: parseFloat(document.getElementById("entry_price").value),
             position: document.getElementById("position").value,
             risk_amount: parseFloat(document.getElementById("risk_amount").value),
-            stop_loss: document.getElementById("stop_loss").value ? parseFloat(document.getElementById("stop_loss").value) : null,
-            take_profit: document.getElementById("take_profit").value ? parseFloat(document.getElementById("take_profit").value) : null
+            stop_loss: document.getElementById("stop_loss").value
+                ? parseFloat(document.getElementById("stop_loss").value)
+                : null,
+            take_profit: document.getElementById("take_profit").value
+                ? parseFloat(document.getElementById("take_profit").value)
+                : null
         };
 
         try {
-            const response = await fetch("http://localhost:5002/trade", {
+            const response = await fetch(`${TRADE_SERVICE_BASE_URL}/trade`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
             });
 
+            if (!response.ok) {
+                throw new Error("Failed to place trade");
+            }
+
             const result = await response.json();
-            alert(`Trade placed successfully! Shares to Buy: ${result.shares_to_buy}`);
-            fetchTrades();  
+            alert(`Trade placed successfully!\nShares to Buy: ${result.shares_to_buy}\nProfit/Loss Estimate: ${result.profit_loss.toFixed(2)}`);
+            
+            fetchTrades();
         } catch (error) {
             console.error("Error placing trade:", error);
             alert("Failed to place trade. Check console for details.");
@@ -34,31 +45,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchTrades() {
         try {
-            const response = await fetch("http://localhost:5002/get_trades");
-            const trades = await response.json();
+            const response = await fetch(`${TRADE_SERVICE_BASE_URL}/get_trades`);
+            if (!response.ok) {
+                throw new Error("Failed to fetch trades");
+            }
 
+            const trades = await response.json();
             if (trades.length === 0) {
                 alert("No trades found yet!");
                 return;
             }
 
-            tradesTableBody.innerHTML = "";  
+            tradesTableBody.innerHTML = "";
             const labels = [];
             const profitLoss = [];
 
             trades.forEach(trade => {
+                const shares_to_buy = trade.risk_amount / (trade.entry_price - (trade.stop_loss || trade.entry_price * 0.95));
+                const total_cost = shares_to_buy * trade.entry_price;
+                const risk_dollar = shares_to_buy * (trade.entry_price - (trade.stop_loss || trade.entry_price * 0.95));
+                const profit_loss = shares_to_buy * ((trade.take_profit || trade.entry_price * 1.1) - trade.entry_price);
+
                 labels.push(trade.stock_ticker);
-                profitLoss.push(trade.profit_loss);
+                profitLoss.push(profit_loss);
 
                 const row = `
                     <tr>
                         <td>${trade.stock_ticker}</td>
-                        <td>${trade.entry_price}</td>
-                        <td>${trade.shares_to_buy.toFixed(2)}</td>
-                        <td>${trade.stop_loss || "N/A"}</td>
-                        <td>${trade.take_profit || "N/A"}</td>
-                        <td>${trade.risk_amount}</td>
-                        <td>${trade.profit_loss.toFixed(2)}</td>
+                        <td>${trade.entry_price.toFixed(2)}</td>
+                        <td>${shares_to_buy.toFixed(2)}</td>
+                        <td>${trade.stop_loss ? trade.stop_loss.toFixed(2) : "N/A"}</td>
+                        <td>${trade.take_profit ? trade.take_profit.toFixed(2) : "N/A"}</td>
+                        <td>${trade.risk_amount.toFixed(2)}</td>
+                        <td>${profit_loss.toFixed(2)}</td>
+                        <td>${total_cost.toFixed(2)}</td>
+                        <td>${risk_dollar.toFixed(2)}</td>
                     </tr>
                 `;
                 tradesTableBody.innerHTML += row;
@@ -75,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     datasets: [{
                         label: "Profit/Loss ($)",
                         data: profitLoss,
-                        backgroundColor: profitLoss.map(p => p > 0 ? "green" : "red"),
+                        backgroundColor: profitLoss.map(p => (p > 0 ? "green" : "red")),
                         borderColor: "black",
                         borderWidth: 1
                     }]
@@ -84,9 +105,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     responsive: true,
                     scales: {
                         y: {
-                            beginAtZero: true, 
-                            suggestedMax: Math.max(...profitLoss) + 20,  
-                            suggestedMin: Math.min(...profitLoss) - 20  
+                            beginAtZero: true,
+                            suggestedMax: Math.max(...profitLoss) + 20,
+                            suggestedMin: Math.min(...profitLoss) - 20
                         }
                     }
                 }
@@ -99,3 +120,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fetchTrades();
 });
+

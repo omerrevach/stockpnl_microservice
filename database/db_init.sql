@@ -12,5 +12,8 @@ CREATE TABLE trades (
     position VARCHAR(10),
     risk_amount FLOAT,
     stop_loss FLOAT,
-    take_profit FLOAT
+    take_profit FLOAT,
+    shares_to_buy FLOAT,
+    profit_loss FLOAT,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
