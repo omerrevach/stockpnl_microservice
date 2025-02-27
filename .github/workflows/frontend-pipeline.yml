@@ -54,7 +54,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.PAT }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/omerrevach/stockpnl_manifests_tests/dispatches \
+            https://api.github.com/repos/omerrevach/stockpnl_manifests_test/dispatches \
             -d '{"event_type": "frontend_service_pipeline_complete", "client_payload": {"service": "frontend_service", "unit": false, "integration": true, "tag": "${{ github.sha }}"}}'
 
 
