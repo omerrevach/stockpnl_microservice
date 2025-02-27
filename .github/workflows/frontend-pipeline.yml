@@ -46,7 +46,7 @@ jobs:
         run: |
           docker push rebachi/stockpnl:frontend-${{ github.run_number }}
 
-      # trigger CD pipeline
+      # trigger cd pipeline
       - name: Trigger cd-auth pipeline
         run: |
           curl -L \
