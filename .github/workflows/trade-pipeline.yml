@@ -1,56 +1,46 @@
 name: trade service pipeline
-
 on:
   push:
     branches:
-    - trade_service
+      - trade_service
   pull_request:
     branches:
-    - trade_service
-
+      - trade_service
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
       - name: Install and Run Sherlock Scanner
         run: |
           pip install sherlock-scanner
-          sherlock . || true
-
+          sherlock . || true # Prevent pipeline failure on findings, optional
       - name: Install and Run Bandit
         run: |
           pip install bandit
-          bandit -r . -ll || true
-
-      - name: Build Docker Image
+          bandit -r . -ll || true # Prevent pipeline failure on findings, optional
+      - name: Build Docker Image with Build Number
         run: |
-          docker build -t rebachi/stockpnl:trade-${{ github.sha }} .
-
+          docker build --no-cache -t rebachi/stockpnl:trade-${{ github.run_number }} .
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
       - name: Push Docker Image to Docker Hub
         run: |
-          docker push rebachi/stockpnl:trade-${{ github.sha }}
-
+          docker push rebachi/stockpnl:trade-${{ github.run_number }}
       # trigger CD pipeline
       - name: Trigger cd-auth pipeline
         run: |
           curl -L \
-            -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.PAT }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/omerrevach/stockpnl_manifests/dispatches \
-            -d '{"event_type": "trade_service_pipeline_complete", "client_payload": {"service": "trade_service", "unit": false, "integration": true, "tag": "${{ github.sha }}"}}'
-
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.PAT }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/omerrevach/stockpnl_manifests/dispatches \
+          -d '{"event_type": "trade_service_pipeline_complete", "client_payload": {"service": "trade_service", "unit": false, "integration": true, "tag": "${{ github.run_number }}"}}'
       - name: Notify on Success
         run: echo "Pipeline is done"
