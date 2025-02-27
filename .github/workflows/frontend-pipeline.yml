@@ -1,19 +1,20 @@
-name: frontend pipeline
-# hi
+name: Frontend CI Pipeline
+
 on:
   push:
     branches:
-      - frontend_service
+      - frontend
   pull_request:
     branches:
-      - frontend_service
+      - frontend
 
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -28,35 +29,32 @@ jobs:
       - name: Install and Run Sherlock Scanner
         run: |
           pip install sherlock-scanner
-          sherlock . || true  # Prevent pipeline failure on findings, optional
+          sherlock . || true  # Prevent pipeline failure on findings
 
       - name: Install and Run Bandit
         run: |
           pip install bandit
-          bandit -r . -ll || true  # Prevent pipeline failure on findings, optional
+          bandit -r . -ll || true  # Prevent pipeline failure on findings
 
-      - name: Build Docker Image
+      - name: Build Docker Image with Build Number
         run: |
-          docker build --no-cache -t rebachi/stockpnl:frontend-${{ github.sha }} .
+          docker build --no-cache -t rebachi/stockpnl:frontend-${{ github.run_number }} .
 
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Push Docker Image to Docker Hub
         run: |
-          docker push rebachi/stockpnl:frontend-${{ github.sha }} 
+          docker push rebachi/stockpnl:frontend-${{ github.run_number }}
 
-      # trigger CD pipeline
-      - name: Trigger cd-auth pipeline
+      - name: Trigger cd-frontend pipeline
         run: |
-          curl -L \
-            -X POST \
+          curl -L -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.PAT }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/omerrevach/stockpnl_manifests_test/dispatches \
-            -d '{"event_type": "frontend_service_pipeline_complete", "client_payload": {"service": "frontend_service", "unit": false, "integration": true, "tag": "${{ github.sha }}"}}'
-
+            -d '{"event_type": "frontend_service_pipeline_complete", "client_payload": {"service": "frontend_service", "build_number": "${{ github.run_number }}"}}'
 
       - name: Notify on Success
-        run: echo "Pipeline is done"
+        run: echo "CI pipeline completed successfully"
