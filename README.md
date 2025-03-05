@@ -2,6 +2,8 @@
 
 ## Microservice App designed to help traders manage portfolios, track trades, and analyze performance dynamically.
 
+### The microservices are built each in their own branch in this repo
+
 ### The project is made up of 3 repositories
 🔹 **Microservices** → [StockPNL Microservice](https://github.com/omerrevach/stockpnl_microservice.git)  
 🔹 **Infrastructure** → [StockPNL Infrastructure](https://github.com/omerrevach/stockpnl_infrustructure.git)  
